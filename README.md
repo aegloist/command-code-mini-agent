@@ -19,13 +19,23 @@ MOCK_CLAUDE=true npm test
 
 ## Run
 
+Real Claude mode:
+
 ```bash
 npm start -- --debug "I'm new to this project, what should I do?"
 ```
 
+Mock mode does not call Claude and does not require `ANTHROPIC_API_KEY`.
+
+After `npm run build` and `npm link`, you can also run the installed CLI as:
+
+```bash
+mini-agent --debug "I'm new to this project, what should I do?"
+```
+
 ## Submission Notes
 
-Time spent: about 6-8 hours.
+Time spent: about 2-4 hours.
 
 Challenges: getting skill routing right so metadata is loaded first and the full skill is loaded only after selection.
 
