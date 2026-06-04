@@ -1,4 +1,4 @@
-# Command Code Mini Agent
+# Mini Agent
 
 A small Node.js CLI agent that routes prompts through Open Agent Skills and Claude Sonnet.
 
