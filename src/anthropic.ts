@@ -77,8 +77,10 @@ function extractText(content: Anthropic.Messages.Message["content"]): string {
 }
 
 function parseRoute(raw: string): SkillRoute {
+  const normalized = stripCodeFences(raw).trim();
+
   try {
-    const parsed = JSON.parse(raw);
+    const parsed = JSON.parse(normalized);
     if (parsed && (typeof parsed.skill === "string" || parsed.skill === null)) {
       return { skill: parsed.skill };
     }
@@ -87,6 +89,16 @@ function parseRoute(raw: string): SkillRoute {
   }
 
   return { skill: null };
+}
+
+function stripCodeFences(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed.startsWith("```")) {
+    return trimmed;
+  }
+
+  const fenceMatch = trimmed.match(/^```(?:json)?\n([\s\S]*?)\n```$/i);
+  return fenceMatch?.[1] ?? trimmed.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
 }
 
 function mockRoute(prompt: string): SkillRoute {
