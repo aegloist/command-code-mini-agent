@@ -1,7 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { runAgent } from "../src/agent.js";
 
 describe("agent routing", () => {
+  afterEach(() => {
+    delete process.env.MOCK_CLAUDE;
+  });
+
   it("selects welcome-me for onboarding prompts", async () => {
     process.env.MOCK_CLAUDE = "true";
 
@@ -19,5 +23,23 @@ describe("agent routing", () => {
 
     expect(result.selectedSkill).toBeNull();
     expect(result.loadedSkill).toBeNull();
+  });
+
+  it("selects changelog-generator for changelog prompts", async () => {
+    process.env.MOCK_CLAUDE = "true";
+
+    const result = await runAgent("Create release notes from these commits");
+
+    expect(result.selectedSkill).toBe("changelog-generator");
+    expect(result.loadedSkill).toBe("changelog-generator");
+  });
+
+  it("selects receiving-code-review for review feedback prompts", async () => {
+    process.env.MOCK_CLAUDE = "true";
+
+    const result = await runAgent("I received code review feedback, help me evaluate it");
+
+    expect(result.selectedSkill).toBe("receiving-code-review");
+    expect(result.loadedSkill).toBe("receiving-code-review");
   });
 });

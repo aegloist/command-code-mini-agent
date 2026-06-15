@@ -5,7 +5,7 @@ export type SkillRoute = {
   skill: string | null;
 };
 
-const DEFAULT_MODEL = "claude-sonnet-4-5-20250929";
+const DEFAULT_MODEL = "claude-sonnet-4-6";
 
 export async function selectSkillWithClaude(prompt: string, skills: SkillMetadata[]): Promise<SkillRoute> {
   if (process.env.MOCK_CLAUDE === "true") {
@@ -17,8 +17,12 @@ export async function selectSkillWithClaude(prompt: string, skills: SkillMetadat
     model: process.env.ANTHROPIC_MODEL ?? DEFAULT_MODEL,
     max_tokens: 200,
     temperature: 0,
-    system:
-      "Select at most one skill from the supplied catalog. Return only JSON like {\"skill\":\"welcome-me\"} or {\"skill\":null}.",
+    system: [
+      "Select at most one skill from the supplied catalog.",
+      "Use a skill only when the user prompt clearly matches that skill's description.",
+      "If the prompt is unrelated or uncertain, return null.",
+      "Return only JSON like {\"skill\":\"welcome-me\"} or {\"skill\":null}.",
+    ].join(" "),
     messages: [
       {
         role: "user",
@@ -47,7 +51,11 @@ export async function generateResponseWithClaude(prompt: string, selectedSkill: 
     model: process.env.ANTHROPIC_MODEL ?? DEFAULT_MODEL,
     max_tokens: 1200,
     temperature: 0.2,
-    system: "Answer the user directly. If a skill is provided, follow it exactly.",
+    system: [
+      "Answer the user directly.",
+      "If a skill is provided, follow the skill instructions exactly.",
+      "If no skill is provided, do not mention unloaded skills.",
+    ].join(" "),
     messages: [
       {
         role: "user",
@@ -103,14 +111,21 @@ function stripCodeFences(raw: string): string {
 
 function mockRoute(prompt: string): SkillRoute {
   const normalized = prompt.toLowerCase();
-  if (normalized.includes("new to this project") || normalized.includes("what should i do")) {
+  if (
+    normalized.includes("new to this project") ||
+    normalized.includes("i'm new") ||
+    normalized.includes("im new") ||
+    normalized.includes("new here") ||
+    normalized.includes("welcome me") ||
+    (normalized.includes("project") && normalized.includes("what should i do"))
+  ) {
     return { skill: "welcome-me" };
   }
   if (normalized.includes("changelog") || normalized.includes("release note")) {
-    return { skill: "changelog-automation" };
+    return { skill: "changelog-generator" };
   }
-  if (normalized.includes("documentation") || normalized.includes("readme") || normalized.includes("docs")) {
-    return { skill: "documentation" };
+  if (normalized.includes("code review") || normalized.includes("review feedback")) {
+    return { skill: "receiving-code-review" };
   }
   return { skill: null };
 }

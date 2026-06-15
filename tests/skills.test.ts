@@ -31,6 +31,29 @@ describe("skill metadata", () => {
 
     expect(() => parseSkillMetadata(raw, "welcome-me", ".skills/welcome-me/SKILL.md")).toThrow();
   });
+
+  it("rejects names longer than 64 characters", () => {
+    const longName = "a".repeat(65);
+    const raw = [
+      "---",
+      `name: ${longName}`,
+      "description: Use for onboarding prompts.",
+      "---",
+    ].join("\n");
+
+    expect(() => parseSkillMetadata(raw, longName, `.skills/${longName}/SKILL.md`)).toThrow();
+  });
+
+  it("rejects descriptions longer than 1024 characters", () => {
+    const raw = [
+      "---",
+      "name: welcome-me",
+      `description: ${"a".repeat(1025)}`,
+      "---",
+    ].join("\n");
+
+    expect(() => parseSkillMetadata(raw, "welcome-me", ".skills/welcome-me/SKILL.md")).toThrow();
+  });
 });
 
 describe("skill discovery", () => {
